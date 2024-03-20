@@ -76,7 +76,7 @@ def compute_distance_error(original_positions, filtered_positions, ellipsoid_mod
 
     for orig_pos, filt_pos in zip(original_positions, filtered_positions):
         orig_lat, orig_lon = orig_pos
-        filt_lat_lon = filt_pos  # Updated to handle filtered positions directly as (lat, lon) tuples
+        filt_lat_lon = filt_pos
         orig_point = (orig_lat, orig_lon)
         dist = geodesic(orig_point, filt_lat_lon, ellipsoid=ellipsoid_model).kilometers
         errors.append(dist)
@@ -84,7 +84,6 @@ def compute_distance_error(original_positions, filtered_positions, ellipsoid_mod
     mean_error = np.mean(errors)
     max_error = np.max(errors)
     return mean_error, max_error
-
 
 
 def main():
