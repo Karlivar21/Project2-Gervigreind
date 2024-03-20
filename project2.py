@@ -71,6 +71,21 @@ def kalman_filter(radar_data):
     return filtered_positions
 
 
+def compute_distance_error(original_positions, filtered_positions, ellipsoid_model='WGS-84'):
+    errors = []
+
+    for orig_pos, filt_pos in zip(original_positions, filtered_positions):
+        orig_lat, orig_lon = orig_pos
+        filt_lat_lon = filt_pos  # Updated to handle filtered positions directly as (lat, lon) tuples
+        orig_point = (orig_lat, orig_lon)
+        dist = geodesic(orig_point, filt_lat_lon, ellipsoid=ellipsoid_model).kilometers
+        errors.append(dist)
+
+    mean_error = np.mean(errors)
+    max_error = np.max(errors)
+    return mean_error, max_error
+
+
 
 def main():
     flights = get_ground_truth_data()
@@ -79,13 +94,31 @@ def main():
 
     unfiltered_radar_data = get_radar_data_for_flight(flight)
     # show_plot(flight, flight_name)
-    show_plot(unfiltered_radar_data, flight_name)
+    # show_plot(unfiltered_radar_data, flight_name)
 
     filtered_positions = kalman_filter(unfiltered_radar_data)
     filtered_radar_data = deepcopy(unfiltered_radar_data)
     filtered_radar_data.data.x = [pos[0] for pos in filtered_positions]
     filtered_radar_data.data.y = [pos[1] for pos in filtered_positions]
-    show_plot(filtered_radar_data, flight_name, sub_title='Kalman Filtered Radar Data')
+    filtered_radar_data = set_lat_lon_from_x_y(filtered_radar_data)
+    # show_plot(filtered_radar_data, flight_name, sub_title='Kalman Filtered Radar Data')
+
+    # Convert filtered Cartesian coordinates to latitude/longitude
+    filtered_lat_lon = list(zip(filtered_radar_data.data.latitude, filtered_radar_data.data.longitude))
+    original_lat_lon = list(zip(flight.data.latitude, flight.data.longitude))
+
+    # Compute distance errors
+    mean_error, max_error = compute_distance_error(original_lat_lon, filtered_lat_lon)
+    print(f"Mean Error: {mean_error} km")
+    print(f"Max Error: {max_error} km")
+
+    # Plot original and filtered tracks
+    fig, ax = plt.subplots()
+    flight.plot(ax, color='green', label='Original Track')
+    filtered_radar_data.plot(ax, color='blue', label='Filtered Track')
+    ax.legend()
+    ax.set_title(f"{flight_name} - Original vs Filtered Track")
+    plt.show()
 
 #############################
 
