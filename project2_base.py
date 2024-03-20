@@ -1,6 +1,6 @@
 import math
 
-from traffic.core.geodesy import bearing, distance, destination
+from pitot.geodesy import bearing, distance, destination
 from traffic.data import samples
 from numpy.random import default_rng
 import pyproj
@@ -130,4 +130,3 @@ def set_lat_lon_from_x_y(flight):
     flight.data["longitude"] = lons
     flight.data["latitude"] = lats
     return flight
-
