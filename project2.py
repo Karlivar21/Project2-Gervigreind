@@ -85,11 +85,37 @@ def compute_distance_error(original_positions, filtered_positions, ellipsoid_mod
     max_error = np.max(errors)
     return mean_error, max_error
 
+def get_experiment_results(flight, unfiltered_radar_data, process_noise_values, observation_noise_values, flight_name):
+    results = {}
+    for process_noise in process_noise_values:
+        for observation_noise in observation_noise_values:
+            print(f"Processing experiment with process noise = {process_noise} and observation noise = {observation_noise}")
+            # Apply Kalman filter with varying noise parameters
+            filtered_positions = kalman_filter(unfiltered_radar_data, process_noise, observation_noise)
+
+            # Convert filtered Cartesian coordinates to latitude/longitude
+            filtered_radar_data = deepcopy(unfiltered_radar_data)
+            filtered_radar_data.data.x = [pos[0] for pos in filtered_positions]
+            filtered_radar_data.data.y = [pos[1] for pos in filtered_positions]
+            filtered_radar_data = set_lat_lon_from_x_y(filtered_radar_data)
+            filtered_lat_lon = list(zip(filtered_radar_data.data.latitude, filtered_radar_data.data.longitude))
+            original_lat_lon = list(zip(flight.data.latitude, flight.data.longitude))
+            # show_plot(filtered_radar_data, flight_name, f"Filtered Radar Data (Process Noise = {process_noise}, Observation Noise = {observation_noise})")
+
+            # Compute distance errors
+            mean_error, max_error = compute_distance_error(original_lat_lon, filtered_lat_lon)
+            print(f"Mean Error: {mean_error} km")
+            print(f"Max Error: {max_error} km")
+
+            # Store results
+            results[(process_noise, observation_noise)] = (mean_error, max_error)
+
+    return results
 
 
 def main():
     flights = get_ground_truth_data()
-    flight_name = 'IGRAD_000' # change this to get another flight
+    flight_name = 'DMUPY_052' # change this to get another flight
     flight = flights[flight_name]
 
     unfiltered_radar_data = get_radar_data_for_flight(flight)
@@ -107,35 +133,14 @@ def main():
     filtered_radar_data = set_lat_lon_from_x_y(filtered_radar_data)
     show_plot(filtered_radar_data, flight_name, "Filtered Radar Data")
 
-    # results = {}
-    # for process_noise in process_noise_values:
-    #     for observation_noise in observation_noise_values:
-    #         print(f"Processing experiment with process noise = {process_noise} and observation noise = {observation_noise}")
-    #         # Apply Kalman filter with varying noise parameters
-    #         filtered_positions = kalman_filter(unfiltered_radar_data, process_noise, observation_noise)
+    # Perform experiments with varying noise parameters
+    results = get_experiment_results(flight, unfiltered_radar_data, process_noise_values, observation_noise_values, flight_name)
 
-    #         # Convert filtered Cartesian coordinates to latitude/longitude
-    #         filtered_radar_data = deepcopy(unfiltered_radar_data)
-    #         filtered_radar_data.data.x = [pos[0] for pos in filtered_positions]
-    #         filtered_radar_data.data.y = [pos[1] for pos in filtered_positions]
-    #         filtered_radar_data = set_lat_lon_from_x_y(filtered_radar_data)
-    #         filtered_lat_lon = list(zip(filtered_radar_data.data.latitude, filtered_radar_data.data.longitude))
-    #         original_lat_lon = list(zip(flight.data.latitude, flight.data.longitude))
-    #         show_plot(filtered_radar_data, flight_name, f"Filtered Radar Data (Process Noise = {process_noise}, Observation Noise = {observation_noise})")
-
-    #         # Compute distance errors
-    #         mean_error, max_error = compute_distance_error(original_lat_lon, filtered_lat_lon)
-    #         print(f"Mean Error: {mean_error} km")
-    #         print(f"Max Error: {max_error} km")
-
-    #         # Store results
-    #         results[(process_noise, observation_noise)] = (mean_error, max_error)
-
-    # print("Experiment Results:")
-    # for params, errors in results.items():
-    #     print(f"Noise Parameters: Process Noise = {params[0]}, Observation Noise = {params[1]}")
-    #     print(f"Mean Error: {errors[0]} km, Max Error: {errors[1]} km")
-    #     print()
+    print("Experiment Results:")
+    for params, errors in results.items():
+        print(f"Noise Parameters: Process Noise = {params[0]}, Observation Noise = {params[1]}")
+        print(f"Mean Error: {errors[0]} km, Max Error: {errors[1]} km")
+        print()
 
 #############################
 
