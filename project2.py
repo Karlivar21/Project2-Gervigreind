@@ -212,7 +212,7 @@ def main():
     filtered_radar_data.data.x = [pos[0] for pos in filtererd_positions]
     filtered_radar_data.data.y = [pos[1] for pos in filtererd_positions]
     filtered_radar_data = set_lat_lon_from_x_y(filtered_radar_data)
-    # show_plot(filtered_radar_data, flight_name, "Filtered Radar Data")
+    show_plot(filtered_radar_data, flight_name, "Filtered Radar Data")
 
     # Perform experiments with varying noise parameters
     results = get_experiment_results(flight, unfiltered_radar_data, process_noise_values, observation_noise_values, flight_name)
