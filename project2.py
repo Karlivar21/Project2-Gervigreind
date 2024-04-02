@@ -245,44 +245,6 @@ def main():
     print("\nFixed Lag Smoothing Results:")
     print(f"Mean Error: {mean_error_smoothed} km, Max Error: {max_error_smoothed} km")
 
-    
-
-# def main():
-#     flights = get_ground_truth_data()
-#     flight_name = 'IGRAD_000' # change this to get another flight
-#     flight = flights[flight_name]
-
-#     unfiltered_radar_data = get_radar_data_for_flight(flight)
-    
-#     # # Define range of noise values
-#     # process_noise_values = [0.01, 0.1, 0.5]
-#     # observation_noise_values = [0.01, 0.1, 0.5]
-
-#     # Perform Kalman filtering
-#     filtered_positions_kalman = kalman_filter(unfiltered_radar_data, 0.1, 0.1)
-
-
-#     # Perform Fixed Lag Smoothing
-#     smoothed_positions_fixed_lag = fixed_lag_smoother(unfiltered_radar_data, 0.1, 0.1, lag=4)
-
-#     # Calculate errors for Kalman filtering
-#     mean_error_filtered, max_error_filtered = compute_distance_error(
-#         list(zip(flight.data.latitude, flight.data.longitude)),
-#         filtered_positions_kalman
-#     )
-
-#     # Calculate errors for Fixed Lag Smoothing
-#     mean_error_smoothed, max_error_smoothed = compute_distance_error(
-#         list(zip(flight.data.latitude, flight.data.longitude)),
-#         smoothed_positions_fixed_lag
-#     )
-
-#     # Print results
-#     print("Kalman Filtering Results:")
-#     print(f"Mean Error: {mean_error_filtered} km, Max Error: {max_error_filtered} km")
-
-#     print("\nFixed Lag Smoothing Results:")
-#     print(f"Mean Error: {mean_error_smoothed} km, Max Error: {max_error_smoothed} km")
 
 
 #############################
